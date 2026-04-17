@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EntityCrypt — Quantum-Grade Database Encryption</title>
+<meta name="description" content="Transparent quantum-resistant encryption for Entity Framework Core. AES-256, ML-KEM-768 (FIPS 203), and Hybrid encryption.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+:root{--void:#030108;--abyss:#060414;--deep:#0a0820;--surface:#110f2e;--elevated:#181545;--border:rgba(120,80,255,.12);--border-glow:rgba(120,80,255,.3);--text:#e8e4f8;--text-dim:#9890b8;--text-ghost:#5a5080;--quantum:#a855f7;--quantum-bright:#c084fc;--quantum-dim:#7c3aed;--cyan:#06d6f0;--cyan-bright:#67e8f9;--emerald:#34d399;--rose:#fb7185;--amber:#fbbf24;--font:'Inter',system-ui,sans-serif;--mono:'JetBrains Mono','Cascadia Code',monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--void);color:var(--text);overflow-x:hidden;line-height:1.7}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--void)}::-webkit-scrollbar-thumb{background:var(--quantum-dim);border-radius:3px}
+#quantum-bg{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* ═══ LANG SWITCH ═══ */
+body.lang-en{direction:ltr;text-align:left}
+body.lang-ar{direction:rtl;text-align:right}
+body.lang-en .ar{display:none!important}
+body.lang-ar .en{display:none!important}
+.lang-toggle{display:flex;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.lang-toggle button{background:none;border:none;color:var(--text-dim);padding:.4rem .9rem;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .25s;font-family:var(--font)}
+.lang-toggle button.active{background:var(--quantum-dim);color:#fff}
+
+/* ═══ NAV ═══ */
+nav{position:fixed;top:0;left:0;right:0;z-index:999;padding:0 2rem;transition:all .4s}
+nav.solid{background:rgba(3,1,8,.92);backdrop-filter:blur(30px);border-bottom:1px solid var(--border)}
+.nav-inner{max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:72px}
+.nav-brand{display:flex;align-items:center;gap:.6rem;text-decoration:none;font-weight:800;font-size:1.3rem;color:var(--text)}
+.nav-brand .q{background:linear-gradient(135deg,var(--cyan),var(--quantum));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nav-links{display:flex;align-items:center;gap:1.5rem;list-style:none}
+.nav-links a{color:var(--text-dim);text-decoration:none;font-size:.85rem;font-weight:500;transition:color .25s}
+.nav-links a:hover{color:var(--cyan-bright)}
+.nav-gh{padding:.5rem 1.2rem!important;background:linear-gradient(135deg,var(--quantum-dim),var(--quantum));border-radius:10px;color:#fff!important;font-weight:600}
+.hamburger{display:none;background:none;border:none;color:var(--text);font-size:1.5rem;cursor:pointer}
+
+/* ═══ HERO ═══ */
+.hero{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:8rem 2rem 4rem;overflow:hidden}
+.hero-orb{position:absolute;border-radius:50%;filter:blur(120px);opacity:.3;animation:float 20s ease-in-out infinite}
+.hero-orb.o1{width:600px;height:600px;background:var(--quantum-dim);top:-10%;right:-10%}
+.hero-orb.o2{width:500px;height:500px;background:var(--cyan);bottom:-15%;left:-10%;animation-delay:-7s}
+.hero-orb.o3{width:300px;height:300px;background:var(--emerald);top:40%;left:30%;opacity:.15;animation-delay:-14s}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(30px,-40px) scale(1.05)}66%{transform:translate(-20px,30px) scale(.95)}}
+.hero-content{position:relative;z-index:2;max-width:920px}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:.75rem;padding:.5rem 1.5rem;border-radius:50px;font-size:.85rem;font-weight:500;color:var(--cyan-bright);background:rgba(6,214,240,.06);border:1px solid rgba(6,214,240,.15);margin-bottom:2.5rem;backdrop-filter:blur(10px)}
+.hero-eyebrow .pulse-dot{width:8px;height:8px;border-radius:50%;background:var(--emerald);box-shadow:0 0 12px var(--emerald);animation:pulse-glow 2s infinite}
+@keyframes pulse-glow{0%,100%{opacity:1;box-shadow:0 0 12px var(--emerald)}50%{opacity:.5;box-shadow:0 0 4px var(--emerald)}}
+.hero h1{font-size:clamp(2.6rem,6.5vw,4.5rem);font-weight:900;line-height:1.15;letter-spacing:-.03em;margin-bottom:1.5rem}
+.glow-text{background:linear-gradient(135deg,var(--cyan-bright),var(--quantum-bright),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% auto;animation:shimmer 4s linear infinite}
+@keyframes shimmer{to{background-position:-200% center}}
+.hero-sub{font-size:1.15rem;color:var(--text-dim);max-width:650px;margin:0 auto 2.5rem;line-height:1.8;font-weight:300}
+.hero-sub strong{color:var(--text);font-weight:600}
+.hero-actions{display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;margin-bottom:2.5rem}
+.btn{display:inline-flex;align-items:center;gap:.6rem;padding:.9rem 2rem;border-radius:14px;font-size:.95rem;font-weight:600;text-decoration:none;border:none;cursor:pointer;transition:all .3s;font-family:var(--font)}
+.btn-quantum{background:linear-gradient(135deg,var(--quantum-dim),var(--quantum));color:#fff;box-shadow:0 0 40px rgba(168,85,247,.25)}
+.btn-quantum:hover{transform:translateY(-3px);box-shadow:0 0 60px rgba(168,85,247,.4)}
+.btn-ghost{background:rgba(255,255,255,.03);color:var(--text);border:1px solid var(--border);backdrop-filter:blur(10px)}
+.btn-ghost:hover{border-color:var(--quantum);background:rgba(168,85,247,.05)}
+.hero-cli{display:inline-flex;align-items:center;gap:1rem;background:rgba(6,4,20,.8);border:1px solid var(--border);border-radius:14px;padding:.85rem 1.6rem;font-family:var(--mono);font-size:.88rem;direction:ltr;backdrop-filter:blur(20px);margin-bottom:2.5rem}
+.hero-cli .prompt{color:var(--quantum-bright)}
+.hero-cli code{color:var(--cyan-bright)}
+.hero-cli .copy{background:none;border:none;color:var(--text-ghost);cursor:pointer;font-size:1rem;transition:all .25s;padding:.2rem}
+.hero-cli .copy:hover{color:var(--cyan)}
+
+/* ═══ LIVE DEMO ═══ */
+.live-demo{display:grid;grid-template-columns:1fr 80px 1fr;gap:.5rem;align-items:center;max-width:850px;margin:0 auto}
+.demo-panel{background:rgba(6,4,20,.6);border:1px solid var(--border);border-radius:16px;padding:1.4rem;backdrop-filter:blur(20px);position:relative;overflow:hidden}
+.demo-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--quantum),transparent)}
+.demo-panel h4{font-size:.72rem;text-transform:uppercase;letter-spacing:.15em;color:var(--text-ghost);margin-bottom:.8rem;font-weight:600}
+.demo-panel.encrypted h4{color:var(--quantum-bright)}
+.demo-row{display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;font-family:var(--mono);font-size:.75rem;direction:ltr;border-bottom:1px solid rgba(120,80,255,.05)}
+.demo-row:last-child{border:none}
+.demo-row .k{color:var(--cyan)}.demo-row .v{color:var(--text-dim)}
+.demo-panel.encrypted .demo-row .k{color:var(--rose)}
+.demo-panel.encrypted .demo-row .v{color:var(--amber);font-size:.68rem}
+.demo-arrow{text-align:center}
+.demo-arrow svg{display:block;margin:0 auto}
+.demo-arrow-label{font-size:.58rem;color:var(--quantum-bright);font-family:var(--mono);margin-top:.3rem}
+.metrics{display:flex;justify-content:center;gap:3.5rem;margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);flex-wrap:wrap}
+.metric{text-align:center}
+.metric .val{font-size:1.6rem;font-weight:800;background:linear-gradient(135deg,var(--cyan),var(--quantum));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-family:var(--mono)}
+.metric .lbl{font-size:.72rem;color:var(--text-ghost);margin-top:.2rem;font-weight:500;text-transform:uppercase;letter-spacing:.05em}
+
+/* ═══ SECTIONS ═══ */
+section{max-width:1200px;margin:0 auto;padding:6rem 2rem;position:relative;z-index:2}
+.sec-header{text-align:center;margin-bottom:3.5rem}
+.sec-tag{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.2em;color:var(--quantum-bright);margin-bottom:.75rem;padding:.35rem 1rem;background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.15);border-radius:50px}
+.sec-header h2{font-size:clamp(1.7rem,3.5vw,2.3rem);font-weight:800;margin-bottom:.6rem}
+.sec-header p{color:var(--text-dim);font-size:1rem;max-width:600px;margin:0 auto;font-weight:300}
+.sec-divider{width:60px;height:3px;background:linear-gradient(90deg,var(--cyan),var(--quantum));margin:0 auto 1rem;border-radius:2px}
+
+/* ═══ FEATURES ═══ */
+.features-hex{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem}
+.feat{background:linear-gradient(135deg,rgba(17,15,46,.8),rgba(6,4,20,.6));border:1px solid var(--border);border-radius:20px;padding:2.2rem 1.8rem;transition:all .4s;position:relative;overflow:hidden}
+.feat::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--cyan),var(--quantum),var(--cyan));opacity:0;transition:opacity .4s}
+.feat:hover{transform:translateY(-6px);border-color:var(--border-glow);box-shadow:0 20px 60px rgba(168,85,247,.1)}
+.feat:hover::after{opacity:1}
+.feat-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1.2rem}
+.i-lock{background:linear-gradient(135deg,rgba(6,214,240,.15),rgba(6,214,240,.05))}
+.i-atom{background:linear-gradient(135deg,rgba(168,85,247,.15),rgba(168,85,247,.05))}
+.i-bolt{background:linear-gradient(135deg,rgba(52,211,153,.15),rgba(52,211,153,.05))}
+.i-link{background:linear-gradient(135deg,rgba(251,191,36,.15),rgba(251,191,36,.05))}
+.i-eye{background:linear-gradient(135deg,rgba(251,113,133,.15),rgba(251,113,133,.05))}
+.i-db{background:linear-gradient(135deg,rgba(96,165,250,.15),rgba(96,165,250,.05))}
+.feat h3{font-size:1.05rem;font-weight:700;margin-bottom:.5rem}
+.feat p{color:var(--text-dim);font-size:.85rem;line-height:1.7;font-weight:300}
+
+/* ═══ LEVELS ═══ */
+.levels-container{display:grid;grid-template-columns:repeat(3,1fr);gap:1.8rem}
+.level{background:linear-gradient(180deg,rgba(17,15,46,.6),rgba(6,4,20,.4));border:1px solid var(--border);border-radius:22px;padding:2.2rem 1.8rem;text-align:center;position:relative;overflow:hidden;transition:all .4s}
+.level::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:60%;height:3px;border-radius:0 0 3px 3px}
+.level:hover{transform:translateY(-6px)}
+.level.l-classical::before{background:linear-gradient(90deg,transparent,var(--emerald),transparent)}
+.level.l-hybrid::before{background:linear-gradient(90deg,transparent,var(--quantum),transparent)}
+.level.l-hybrid{border-color:rgba(168,85,247,.2)}
+.level.l-pqc::before{background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+.level-badge{display:inline-block;padding:.25rem .8rem;border-radius:8px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.8rem}
+.l-classical .level-badge{background:rgba(52,211,153,.1);color:var(--emerald);border:1px solid rgba(52,211,153,.2)}
+.l-hybrid .level-badge{background:rgba(168,85,247,.1);color:var(--quantum-bright);border:1px solid rgba(168,85,247,.2)}
+.l-pqc .level-badge{background:rgba(6,214,240,.1);color:var(--cyan-bright);border:1px solid rgba(6,214,240,.2)}
+.level h3{font-size:1.3rem;font-weight:800;margin-bottom:.2rem}
+.level .algo{font-family:var(--mono);font-size:.78rem;color:var(--text-ghost);margin-bottom:1.2rem}
+.level .perf-bar{height:5px;background:rgba(255,255,255,.05);border-radius:3px;margin-bottom:.4rem;overflow:hidden}
+.level .perf-bar .fill{height:100%;border-radius:3px}
+.l-classical .fill{width:95%;background:linear-gradient(90deg,var(--emerald),#6ee7b7)}
+.l-hybrid .fill{width:40%;background:linear-gradient(90deg,var(--quantum-dim),var(--quantum-bright))}
+.l-pqc .fill{width:20%;background:linear-gradient(90deg,#0891b2,var(--cyan))}
+.level .timing{font-family:var(--mono);font-size:.78rem;color:var(--text-dim);margin-bottom:.4rem}
+.level .desc{font-size:.8rem;color:var(--text-ghost);font-weight:300}
+.level .recommend{display:inline-block;margin-top:.8rem;padding:.25rem .7rem;border-radius:6px;font-size:.68rem;font-weight:600;background:rgba(168,85,247,.1);color:var(--quantum-bright);border:1px solid rgba(168,85,247,.15)}
+
+/* ═══ CODE ═══ */
+.code-showcase{display:grid;grid-template-columns:1fr 1fr;gap:2.5rem;align-items:start}
+.code-info h3{font-size:1.4rem;font-weight:700;margin-bottom:.8rem}
+.code-info p{color:var(--text-dim);line-height:1.8;margin-bottom:1.5rem;font-weight:300}
+.steps{list-style:none}.steps li{display:flex;gap:1rem;margin-bottom:1.2rem;align-items:flex-start}
+.step-n{flex-shrink:0;width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.82rem;background:linear-gradient(135deg,rgba(168,85,247,.15),rgba(6,214,240,.05));color:var(--quantum-bright);border:1px solid rgba(168,85,247,.15)}
+.steps li span{color:var(--text-dim);padding-top:.35rem;font-size:.88rem}
+.steps li code{font-family:var(--mono);color:var(--cyan);font-size:.82rem;background:rgba(6,214,240,.08);padding:.12rem .4rem;border-radius:4px}
+.code-window{background:rgba(3,1,8,.8);border:1px solid var(--border);border-radius:16px;overflow:hidden;backdrop-filter:blur(20px);box-shadow:0 25px 80px rgba(0,0,0,.4)}
+.code-titlebar{display:flex;align-items:center;justify-content:space-between;padding:.8rem 1.1rem;background:rgba(255,255,255,.02);border-bottom:1px solid var(--border)}
+.code-dots{display:flex;gap:6px}
+.code-dots span{width:10px;height:10px;border-radius:50%}
+.code-dots .d1{background:#ff5f57}.code-dots .d2{background:#febc2e}.code-dots .d3{background:#28c840}
+.code-lang{font-family:var(--mono);font-size:.7rem;color:var(--text-ghost);padding:.2rem .5rem;background:rgba(255,255,255,.03);border-radius:4px}
+.code-window pre{padding:1.3rem;overflow-x:auto;font-family:var(--mono);font-size:.8rem;line-height:1.7;direction:ltr;text-align:left}
+.kw{color:#c084fc}.str{color:#86efac}.cm{color:#4a4570}.fn{color:#67e8f9}.tp{color:#fbbf24}.at{color:#f472b6}.num{color:#fb923c}
+
+/* ═══ COMPLIANCE ═══ */
+.compliance-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem;margin-bottom:3rem}
+.comp-card{background:linear-gradient(135deg,rgba(17,15,46,.7),rgba(6,4,20,.5));border:1px solid var(--border);border-radius:18px;padding:2rem;transition:all .35s;position:relative;overflow:hidden}
+.comp-card:hover{border-color:var(--border-glow);transform:translateY(-4px)}
+.comp-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:0;transition:opacity .3s}
+.comp-card:hover::before{opacity:1}
+.comp-card.nist::before{background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+.comp-card.gdpr::before{background:linear-gradient(90deg,transparent,#60a5fa,transparent)}
+.comp-card.pci::before{background:linear-gradient(90deg,transparent,var(--amber),transparent)}
+.comp-card.hipaa::before{background:linear-gradient(90deg,transparent,var(--emerald),transparent)}
+.comp-card.nca::before{background:linear-gradient(90deg,transparent,var(--quantum),transparent)}
+.comp-card.iso::before{background:linear-gradient(90deg,transparent,var(--rose),transparent)}
+.comp-badge{display:inline-flex;align-items:center;gap:.5rem;padding:.3rem .9rem;border-radius:8px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:1rem}
+.nist .comp-badge{background:rgba(6,214,240,.08);color:var(--cyan-bright);border:1px solid rgba(6,214,240,.15)}
+.gdpr .comp-badge{background:rgba(96,165,250,.08);color:#93bbfd;border:1px solid rgba(96,165,250,.15)}
+.pci .comp-badge{background:rgba(251,191,36,.08);color:var(--amber);border:1px solid rgba(251,191,36,.15)}
+.hipaa .comp-badge{background:rgba(52,211,153,.08);color:var(--emerald);border:1px solid rgba(52,211,153,.15)}
+.nca .comp-badge{background:rgba(168,85,247,.08);color:var(--quantum-bright);border:1px solid rgba(168,85,247,.15)}
+.iso .comp-badge{background:rgba(251,113,133,.08);color:var(--rose);border:1px solid rgba(251,113,133,.15)}
+.comp-card h3{font-size:1.05rem;font-weight:700;margin-bottom:.4rem}
+.comp-card p{color:var(--text-dim);font-size:.82rem;line-height:1.7;font-weight:300;margin-bottom:.8rem}
+.comp-checks{list-style:none}
+.comp-checks li{display:flex;align-items:flex-start;gap:.5rem;font-size:.78rem;color:var(--text-dim);padding:.25rem 0}
+.comp-checks li::before{content:'✓';color:var(--emerald);font-weight:700;flex-shrink:0}
+
+/* ═══ ARCHITECTURE DIAGRAM ═══ */
+.arch-diagram{background:linear-gradient(180deg,rgba(17,15,46,.6),rgba(3,1,8,.5));border:1px solid var(--border);border-radius:20px;padding:3rem 2.5rem;margin-bottom:3rem}
+.arch-diagram h3{text-align:center;font-size:1.3rem;font-weight:700;margin-bottom:2.5rem}
+.arch-flow{display:flex;flex-direction:column;gap:0;align-items:center;direction:ltr;text-align:center}
+.arch-layer{width:100%;max-width:750px;padding:1.2rem 1.5rem;border-radius:14px;position:relative;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.arch-layer .layer-name{font-weight:700;font-size:.88rem;white-space:nowrap}
+.arch-layer .layer-detail{font-family:var(--mono);font-size:.72rem;color:var(--text-dim);text-align:right;flex:1}
+.arch-l1{background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.2);color:#93bbfd}
+.arch-l2{background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.2);color:var(--quantum-bright)}
+.arch-l3{background:rgba(6,214,240,.08);border:1px solid rgba(6,214,240,.2);color:var(--cyan-bright)}
+.arch-l4{background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.2);color:var(--emerald)}
+.arch-l5{background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.2);color:var(--amber)}
+.arch-l6{background:rgba(251,113,133,.08);border:1px solid rgba(251,113,133,.2);color:var(--rose)}
+.arch-arrow{width:2px;height:28px;background:linear-gradient(180deg,var(--quantum),var(--cyan));margin:0 auto;position:relative}
+.arch-arrow::after{content:'▼';position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);font-size:.6rem;color:var(--quantum-bright)}
+.arch-side-labels{display:flex;justify-content:space-between;width:100%;max-width:750px;margin-top:1.5rem}
+.arch-side-label{font-size:.68rem;color:var(--text-ghost);font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em;padding:.35rem .8rem;border:1px solid var(--border);border-radius:8px}
+
+/* ═══ COMPLIANCE MATRIX ═══ */
+.matrix-wrap{overflow-x:auto;margin-bottom:2rem}
+.comp-matrix{width:100%;border-collapse:collapse;font-size:.78rem;direction:ltr;text-align:left;min-width:800px}
+.comp-matrix th{padding:.8rem 1rem;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-ghost);border-bottom:2px solid var(--border);background:rgba(17,15,46,.4);position:sticky;top:0}
+.comp-matrix td{padding:.7rem 1rem;border-bottom:1px solid rgba(120,80,255,.05);vertical-align:top}
+.comp-matrix tr:hover td{background:rgba(168,85,247,.03)}
+.comp-matrix .std-name{color:var(--quantum-bright);font-weight:600;font-family:var(--mono);white-space:nowrap}
+.comp-matrix .src-link{font-family:var(--mono);font-size:.68rem}
+.comp-matrix .src-link a,.comp-checks .src-link a{color:var(--cyan);text-decoration:none;border-bottom:1px dotted rgba(6,214,240,.3);transition:all .2s}
+.comp-matrix .src-link a:hover,.comp-checks .src-link a:hover{color:var(--cyan-bright);border-bottom-color:var(--cyan)}
+.comp-checks .src-link{display:block;font-family:var(--mono);font-size:.65rem;margin-top:.15rem;padding-left:1.2rem}
+.comp-matrix .check{color:var(--emerald);font-weight:700;text-align:center;font-size:1rem}
+.comp-matrix .partial{color:var(--amber);font-weight:700;text-align:center;font-size:1rem}
+.comp-matrix .na{color:var(--text-ghost);text-align:center;font-size:.7rem}
+
+/* ═══ KEY MGMT DIAGRAM ═══ */
+.key-mgmt{background:linear-gradient(180deg,rgba(17,15,46,.5),rgba(3,1,8,.4));border:1px solid var(--border);border-radius:20px;padding:2.5rem;margin-bottom:2rem}
+.key-mgmt h3{text-align:center;font-size:1.15rem;font-weight:700;margin-bottom:2rem}
+.key-flow{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;direction:ltr;text-align:center}
+.key-step{background:rgba(6,4,20,.5);border:1px solid var(--border);border-radius:14px;padding:1.2rem 1rem;position:relative}
+.key-step .ks-icon{font-size:1.5rem;margin-bottom:.5rem}
+.key-step h4{font-size:.82rem;font-weight:700;margin-bottom:.3rem}
+.key-step p{font-size:.7rem;color:var(--text-dim);line-height:1.5}
+.key-step::after{content:'→';position:absolute;right:-12px;top:50%;transform:translateY(-50%);color:var(--quantum-bright);font-weight:700;font-size:1.1rem}
+.key-step:last-child::after{display:none}
+
+/* ═══ BENCHMARKS ═══ */
+.bench-card{background:linear-gradient(180deg,rgba(17,15,46,.6),rgba(3,1,8,.4));border:1px solid var(--border);border-radius:18px;overflow:hidden}
+.bench-top{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.8rem;border-bottom:1px solid var(--border)}
+.bench-top strong{font-weight:700;font-size:.9rem}
+.bench-top .env{font-family:var(--mono);font-size:.72rem;color:var(--text-ghost);padding:.25rem .7rem;background:rgba(255,255,255,.03);border-radius:6px}
+.bench-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.78rem;direction:ltr;text-align:left}
+.bench-table th{padding:.8rem 1.3rem;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-ghost);border-bottom:1px solid var(--border)}
+.bench-table td{padding:.75rem 1.3rem;border-bottom:1px solid rgba(120,80,255,.05)}
+.bench-table tr:hover td{background:rgba(168,85,247,.03)}
+.bench-table .method{color:var(--cyan-bright);font-weight:500}
+.bench-table .time{color:var(--emerald);font-weight:600}
+.bench-table .mem{color:var(--text-ghost)}
+
+/* ═══ SECURITY FORTRESS ═══ */
+.fortress{display:grid;grid-template-columns:repeat(3,1fr);gap:1.3rem}
+.fort-item{display:flex;gap:1rem;padding:1.5rem;background:linear-gradient(135deg,rgba(17,15,46,.6),rgba(6,4,20,.4));border:1px solid var(--border);border-radius:16px;transition:all .35s}
+.fort-item:hover{border-color:var(--border-glow);transform:translateY(-4px)}
+.fort-icon{flex-shrink:0;width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;background:linear-gradient(135deg,rgba(168,85,247,.1),rgba(6,214,240,.05));border:1px solid rgba(168,85,247,.1)}
+.fort-item h4{font-size:.88rem;font-weight:700;margin-bottom:.2rem}
+.fort-item p{color:var(--text-dim);font-size:.78rem;font-weight:300}
+
+/* ═══ PACKAGES ═══ */
+.pkg-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.8rem}
+.pkg{background:linear-gradient(135deg,rgba(17,15,46,.6),rgba(6,4,20,.4));border:1px solid var(--border);border-radius:18px;padding:2.2rem;transition:all .4s}
+.pkg:hover{border-color:var(--border-glow);transform:translateY(-5px)}
+.pkg h3{font-family:var(--mono);font-size:1.05rem;color:var(--quantum-bright);margin-bottom:.5rem;font-weight:600}
+.pkg p{color:var(--text-dim);font-size:.85rem;margin-bottom:1.2rem;font-weight:300;line-height:1.7}
+.pkg-cmd{display:flex;align-items:center;justify-content:space-between;background:rgba(3,1,8,.6);border:1px solid var(--border);border-radius:10px;padding:.6rem 1rem;font-family:var(--mono);font-size:.75rem;color:var(--cyan-bright);direction:ltr}
+.pkg-cmd button{background:none;border:none;color:var(--text-ghost);cursor:pointer;transition:color .2s;font-size:.85rem}
+.pkg-cmd button:hover{color:var(--cyan)}
+
+/* ═══ CTA ═══ */
+.cta-section{text-align:center;padding:7rem 2rem;position:relative;z-index:2}
+.cta-section::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(168,85,247,.06),transparent 70%);pointer-events:none}
+.cta-section h2{font-size:clamp(1.6rem,3.5vw,2.5rem);font-weight:800;margin-bottom:.8rem}
+.cta-section p{color:var(--text-dim);font-size:1.05rem;margin-bottom:2rem;font-weight:300}
+.cta-buttons{display:flex;justify-content:center;gap:1rem;flex-wrap:wrap}
+
+/* ═══ FOOTER ═══ */
+footer{border-top:1px solid var(--border);padding:3rem 2rem;text-align:center;position:relative;z-index:2}
+.footer-tech{display:flex;justify-content:center;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.footer-tech span{padding:.3rem .7rem;font-family:var(--mono);font-size:.68rem;color:var(--text-dim);background:rgba(17,15,46,.6);border:1px solid var(--border);border-radius:8px}
+.footer-nav{display:flex;justify-content:center;gap:2rem;margin-bottom:1.2rem;list-style:none;flex-wrap:wrap}
+.footer-nav a{color:var(--text-dim);text-decoration:none;font-size:.85rem;transition:color .25s}
+.footer-nav a:hover{color:var(--quantum-bright)}
+.footer-copy{color:var(--text-ghost);font-size:.75rem}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:1024px){.features-hex,.fortress,.compliance-grid{grid-template-columns:repeat(2,1fr)}.levels-container{grid-template-columns:1fr}.code-showcase{grid-template-columns:1fr}.key-flow{grid-template-columns:repeat(2,1fr)}.key-step:nth-child(2)::after{display:none}}
+@media(max-width:768px){.nav-links{display:none}.hamburger{display:block}.nav-links.open{display:flex;flex-direction:column;position:absolute;top:72px;left:0;right:0;background:rgba(3,1,8,.98);backdrop-filter:blur(30px);padding:1.5rem 2rem;border-bottom:1px solid var(--border);gap:1rem}.features-hex,.fortress,.compliance-grid,.pkg-grid{grid-template-columns:1fr}.live-demo{grid-template-columns:1fr;gap:1rem}.demo-arrow{transform:rotate(90deg)}.metrics{gap:1.5rem}.key-flow{grid-template-columns:1fr}.key-step::after{display:none}}
+
+/* ═══ ANIMATIONS ═══ */
+.reveal{opacity:0;transform:translateY(25px);transition:opacity .6s ease,transform .6s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:.1s}.reveal-delay-2{transition-delay:.2s}.reveal-delay-3{transition-delay:.3s}
+.quantum-shield{display:inline-block;position:relative;font-weight:900}
+</style>
+</head>
+<body class="lang-ar">
+
+<canvas id="quantum-bg"></canvas>
+
+<!-- ═══ NAV ═══ -->
+<nav id="navbar">
+<div class="nav-inner">
+    <a href="#" class="nav-brand">🔐 <span class="q">EntityCrypt</span></a>
+    <ul class="nav-links" id="navLinks">
+        <li><a href="#features"><span class="ar">الميزات</span><span class="en">Features</span></a></li>
+        <li><a href="#levels"><span class="ar">مستويات التشفير</span><span class="en">Encryption Levels</span></a></li>
+        <li><a href="#quickstart"><span class="ar">البدء السريع</span><span class="en">Quick Start</span></a></li>
+        <li><a href="#compliance"><span class="ar">الامتثال</span><span class="en">Compliance</span></a></li>
+        <li><a href="#benchmarks"><span class="ar">الأداء</span><span class="en">Benchmarks</span></a></li>
+        <li>
+            <div class="lang-toggle">
+                <button id="btnAr" class="active" onclick="setLang('ar')">العربية</button>
+                <button id="btnEn" onclick="setLang('en')">English</button>
+            </div>
+        </li>
+        <li><a href="https://github.com/sbay-dev/EntityCrypt" target="_blank" class="nav-gh">GitHub ⭐</a></li>
+    </ul>
+    <button class="hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')">☰</button>
+</div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<header class="hero">
+    <div class="hero-orb o1"></div><div class="hero-orb o2"></div><div class="hero-orb o3"></div>
+    <div class="hero-content">
+        <div class="hero-eyebrow">
+            <span class="pulse-dot"></span>
+            v2.0.2 · .NET 10 · ML-KEM-768 · FIPS 203
+        </div>
+        <h1>
+            <span class="ar"><span class="quantum-shield">تشفير كمّي</span><br><span class="glow-text">غير مسبوق</span> لقواعد البيانات</span>
+            <span class="en"><span class="glow-text">Quantum-Grade</span><br>Database Encryption</span>
+        </h1>
+        <p class="hero-sub">
+            <span class="ar">أول مكتبة <strong>Entity Framework Core</strong> بتشفير ما بعد الكم.<br>سطر واحد يحوّل قاعدة بياناتك إلى <strong>حصن رقمي</strong> لا يُخترق — حتى بالحواسيب الكمّية.</span>
+            <span class="en">The first <strong>Entity Framework Core</strong> library with Post-Quantum Cryptography.<br>One line transforms your database into an <strong>impenetrable digital fortress</strong> — even against quantum computers.</span>
+        </p>
+        <div class="hero-actions">
+            <a href="#quickstart" class="btn btn-quantum"><span class="ar">⚛️ ابدأ التشفير الكمّي</span><span class="en">⚛️ Start Quantum Encryption</span></a>
+            <a href="https://github.com/sbay-dev/EntityCrypt" target="_blank" class="btn btn-ghost"><span class="ar">عرض الكود المصدري</span><span class="en">View Source Code</span></a>
+        </div>
+        <div class="hero-cli">
+            <span class="prompt">$</span>
+            <code>dotnet add package EntityCrypt.EFCore</code>
+            <button class="copy" onclick="navigator.clipboard.writeText('dotnet add package EntityCrypt.EFCore');this.textContent='✓';setTimeout(()=>this.textContent='📋',2000)">📋</button>
+        </div>
+
+        <div class="live-demo">
+            <div class="demo-panel">
+                <h4><span class="ar">📝 بيانات التطبيق</span><span class="en">📝 Application Data</span></h4>
+                <div class="demo-row"><span class="k">Id</span><span class="v">1</span></div>
+                <div class="demo-row"><span class="k">Name</span><span class="v">"Ahmed"</span></div>
+                <div class="demo-row"><span class="k">Email</span><span class="v">"ahmed@mail.com"</span></div>
+                <div class="demo-row"><span class="k">SSN</span><span class="v">"123-45-6789"</span></div>
+                <div class="demo-row"><span class="k">CreditCard</span><span class="v">"4111-XXXX-XXXX"</span></div>
+            </div>
+            <div class="demo-arrow">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="18" stroke="url(#g1)" stroke-width="2" stroke-dasharray="4 3"><animateTransform attributeName="transform" type="rotate" dur="8s" from="0 20 20" to="360 20 20" repeatCount="indefinite"/></circle><path d="M14 20h12M22 15l4 5-4 5" stroke="var(--cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="g1" x1="0" y1="0" x2="40" y2="40"><stop stop-color="var(--cyan)"/><stop offset="1" stop-color="var(--quantum)"/></linearGradient></defs></svg>
+                <div class="demo-arrow-label">AES-256 +<br>ML-KEM-768</div>
+            </div>
+            <div class="demo-panel encrypted">
+                <h4><span class="ar">🔐 قاعدة البيانات المشفّرة</span><span class="en">🔐 Encrypted Database</span></h4>
+                <div class="demo-row"><span class="k">mc_7f2a</span><span class="v">1</span></div>
+                <div class="demo-row"><span class="k">mc_e9b1</span><span class="v" id="enc1">3Kf8Lm2Pq9Rt...</span></div>
+                <div class="demo-row"><span class="k">mc_4d3c</span><span class="v" id="enc2">MLKEM:xB7n9...</span></div>
+                <div class="demo-row"><span class="k">mc_a1f0</span><span class="v" id="enc3">y8Hj2Kl5Mn7...</span></div>
+                <div class="demo-row"><span class="k">mc_c2e8</span><span class="v" id="enc4">PQC:9vWx3Yz...</span></div>
+            </div>
+        </div>
+
+        <div class="metrics">
+            <div class="metric"><div class="val">~1.3µs</div><div class="lbl"><span class="ar">زمن التشفير</span><span class="en">Encrypt Time</span></div></div>
+            <div class="metric"><div class="val">750K+</div><div class="lbl"><span class="ar">عملية/ثانية</span><span class="en">Ops/Sec</span></div></div>
+            <div class="metric"><div class="val">FIPS 203</div><div class="lbl"><span class="ar">معيار PQC</span><span class="en">PQC Standard</span></div></div>
+            <div class="metric"><div class="val">70+</div><div class="lbl"><span class="ar">اختبار</span><span class="en">Tests</span></div></div>
+            <div class="metric"><div class="val">0</div><div class="lbl"><span class="ar">تغيير بالكود</span><span class="en">Code Changes</span></div></div>
+        </div>
+    </div>
+</header>
+
+<!-- ═══ FEATURES ═══ -->
+<section id="features">
+    <div class="sec-header reveal">
+        <span class="sec-tag"><span class="ar">⚛️ القدرات</span><span class="en">⚛️ Capabilities</span></span>
+        <div class="sec-divider"></div>
+        <h2><span class="ar">تشفير لم يكن ممكناً من قبل</span><span class="en">Encryption Never Possible Before</span></h2>
+        <p><span class="ar">حماية شاملة متعددة الطبقات — من البيانات إلى المخطط إلى البنية</span><span class="en">Comprehensive multi-layer protection — from data to schema to structure</span></p>
+    </div>
+    <div class="features-hex">
+        <div class="feat reveal reveal-delay-1">
+            <div class="feat-icon i-lock">🔒</div>
+            <h3><span class="ar">تشفير شفاف بالكامل</span><span class="en">Fully Transparent Encryption</span></h3>
+            <p><span class="ar">لا حاجة لتغيير سطر واحد من كود التطبيق. أضف سمة واحدة وكل شيء يُشفّر ويُفكّ تلقائياً.</span><span class="en">No need to change a single line of application code. Add one attribute and everything is encrypted and decrypted automatically via EF Core interceptors.</span></p>
+        </div>
+        <div class="feat reveal reveal-delay-2">
+            <div class="feat-icon i-atom">⚛️</div>
+            <h3><span class="ar">تشفير ما بعد الكم (PQC)</span><span class="en">Post-Quantum Cryptography (PQC)</span></h3>
+            <p><span class="ar">ML-KEM-768 وفق FIPS 203 — المعيار الرسمي من NIST. بياناتك محمية حتى مع ظهور الحواسيب الكمّية.</span><span class="en">ML-KEM-768 per FIPS 203 — the official NIST standard. Your data is protected today and tomorrow, even against quantum computers.</span></p>
+        </div>
+        <div class="feat reveal reveal-delay-3">
+            <div class="feat-icon i-bolt">⚡</div>
+            <h3><span class="ar">أداء خارق</span><span class="en">Blazing Performance</span></h3>
+            <p><span class="ar">~1.3 ميكروثانية لكل عملية AES-256. أكثر من 750,000 عملية/ثانية.</span><span class="en">~1.3 µs per AES-256 operation. Over 750,000 ops/sec. Imperceptible in production.</span></p>
+        </div>
+        <div class="feat reveal reveal-delay-1">
+            <div class="feat-icon i-eye">👁️‍🗨️</div>
+            <h3><span class="ar">إخفاء المخطط الكامل</span><span class="en">Full Schema Obfuscation</span></h3>
+            <p><span class="ar">أسماء الجداول والأعمدة ومفاتيح PK/FK تُشفّر إلى رموز عشوائية.</span><span class="en">Table names, column names, and PK/FK keys are encrypted into random tokens. Attackers see only digital chaos.</span></p>
+        </div>
+        <div class="feat reveal reveal-delay-2">
+            <div class="feat-icon i-link">🔗</div>
+            <h3><span class="ar">علاقات سليمة</span><span class="en">Intact Relationships</span></h3>
+            <p><span class="ar">العلاقات بين الجداول تبقى تعمل بشكل طبيعي رغم تشفير كل شيء.</span><span class="en">Table relationships work normally despite full encryption. JOINs and FKs function without errors.</span></p>
+        </div>
+        <div class="feat reveal reveal-delay-3">
+            <div class="feat-icon i-db">🗄️</div>
+            <h3><span class="ar">كل قواعد البيانات</span><span class="en">All Databases</span></h3>
+            <p><span class="ar">SQL Server، PostgreSQL، SQLite، MySQL، Oracle — أي قاعدة بيانات يدعمها EF Core.</span><span class="en">SQL Server, PostgreSQL, SQLite, MySQL, Oracle — any database supported by EF Core works automatically.</span></p>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ ENCRYPTION LEVELS ═══ -->
+<section id="levels">
+    <div class="sec-header reveal">
+        <span class="sec-tag"><span class="ar">🛡️ مستويات الحماية</span><span class="en">🛡️ Protection Levels</span></span>
+        <div class="sec-divider"></div>
+        <h2><span class="ar">ثلاث طبقات من الدرع الكمّي</span><span class="en">Three Layers of Quantum Shielding</span></h2>
+        <p><span class="ar">اختر المستوى المناسب لحساسية بياناتك</span><span class="en">Choose the right level for your data sensitivity</span></p>
+    </div>
+    <div class="levels-container">
+        <div class="level l-classical reveal reveal-delay-1">
+            <span class="level-badge"><span class="ar">سريع</span><span class="en">Fast</span></span>
+            <h3>⚡ Classical</h3>
+            <div class="algo">AES-256-CBC</div>
+            <div class="perf-bar"><div class="fill"></div></div>
+            <div class="timing">~1.3 µs encrypt · ~3.3 µs decrypt</div>
+            <div class="desc"><span class="ar">الأسرع — للبيانات الحساسة القياسية. 256-bit قوة تشفير عسكرية.</span><span class="en">Fastest — for standard sensitive data. 256-bit military-grade encryption strength.</span></div>
+        </div>
+        <div class="level l-hybrid reveal reveal-delay-2">
+            <span class="level-badge"><span class="ar">⭐ موصى به</span><span class="en">⭐ Recommended</span></span>
+            <h3>🔀 Hybrid</h3>
+            <div class="algo">AES-256 + ML-KEM-768</div>
+            <div class="perf-bar"><div class="fill"></div></div>
+            <div class="timing">~30 µs encrypt · ~76 µs decrypt</div>
+            <div class="desc"><span class="ar">الأفضل — حماية كلاسيكية وكمّية معاً. إذا فُكّ أحدهما يبقى الآخر.</span><span class="en">Best — classical and quantum protection combined. If one breaks, the other holds.</span></div>
+            <span class="recommend"><span class="ar">الخيار الأمثل للإنتاج</span><span class="en">Optimal for Production</span></span>
+        </div>
+        <div class="level l-pqc reveal reveal-delay-3">
+            <span class="level-badge"><span class="ar">المستقبل</span><span class="en">Future-Proof</span></span>
+            <h3>⚛️ Post-Quantum</h3>
+            <div class="algo">ML-KEM-768 (FIPS 203)</div>
+            <div class="perf-bar"><div class="fill"></div></div>
+            <div class="timing">~49 µs keygen · ~25 µs encap</div>
+            <div class="desc"><span class="ar">الأقوى — مقاوم كلياً للحواسيب الكمّية. معيار NIST الرسمي.</span><span class="en">Strongest — fully quantum-computer resistant. Official NIST standard.</span></div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ QUICK START ═══ -->
+<section id="quickstart">
+    <div class="sec-header reveal">
+        <span class="sec-tag"><span class="ar">🚀 البدء السريع</span><span class="en">🚀 Quick Start</span></span>
+        <div class="sec-divider"></div>
+        <h2><span class="ar">ثلاث خطوات إلى التشفير الكمّي</span><span class="en">Three Steps to Quantum Encryption</span></h2>
+    </div>
+    <div class="code-showcase reveal">
+        <div class="code-info">
+            <h3><span class="ar">سطر واحد يُغيّر كل شيء</span><span class="en">One Line Changes Everything</span></h3>
+            <p><span class="ar">أضف سمات التشفير، فعّل EntityCrypt، واستخدم EF Core كالمعتاد.</span><span class="en">Add encryption attributes, activate EntityCrypt, and use EF Core as usual. Encryption and decryption happen in a completely invisible layer.</span></p>
+            <ul class="steps">
+                <li><span class="step-n">1</span><span><span class="ar">عرّف كياناتك مع سمة <code>[EncryptedTable]</code></span><span class="en">Define entities with <code>[EncryptedTable]</code></span></span></li>
+                <li><span class="step-n">2</span><span><span class="ar">استدعِ <code>.UseEntityCryptClassical()</code></span><span class="en">Call <code>.UseEntityCryptClassical()</code></span></span></li>
+                <li><span class="step-n">3</span><span><span class="ar">استخدم EF Core كالمعتاد — <strong style="color:var(--text)">بدون أي تغيير</strong></span><span class="en">Use EF Core as usual — <strong style="color:var(--text)">zero changes needed</strong></span></span></li>
+            </ul>
+        </div>
+        <div class="code-window">
+            <div class="code-titlebar"><div class="code-dots"><span class="d1"></span><span class="d2"></span><span class="d3"></span></div><span class="code-lang">Program.cs</span></div>
+            <pre><code><span class="cm">// 1. Define encrypted entities</span>
+<span class="at">[EncryptedTable]</span>
+<span class="kw">public class</span> <span class="tp">Customer</span>
+{
+    <span class="kw">public int</span> Id { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+    <span class="at">[Encrypted]</span>
+    <span class="kw">public string</span> Name { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+    <span class="at">[Encrypted(Level = EncryptionLevel.Hybrid)]</span>
+    <span class="kw">public string</span> SSN { <span class="kw">get</span>; <span class="kw">set</span>; }
+}
+
+<span class="cm">// 2. Activate quantum encryption</span>
+options.<span class="fn">UseSqlite</span>(<span class="str">"Data Source=app.db"</span>)
+       .<span class="fn">UseEntityCryptClassical</span>(<span class="str">"key"</span>);
+
+<span class="cm">// 3. Use normally — 100% transparent!</span>
+db.Customers.<span class="fn">Add</span>(<span class="kw">new</span> { Name = <span class="str">"Ahmed"</span>, SSN = <span class="str">"123-45-6789"</span> });
+<span class="kw">await</span> db.<span class="fn">SaveChangesAsync</span>();
+<span class="cm">// Auto-encrypted in database ✓</span></code></pre>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ COMPLIANCE & STANDARDS ═══ -->
+<section id="compliance">
+    <div class="sec-header reveal">
+        <span class="sec-tag"><span class="ar">📜 الامتثال والمعايير</span><span class="en">📜 Compliance & Standards</span></span>
+        <div class="sec-divider"></div>
+        <h2><span class="ar">امتثال معايير الأمن السيبراني العالمية والمحلية</span><span class="en">Global & Regional Cybersecurity Standards Compliance</span></h2>
+        <p><span class="ar">مصمم للامتثال الكامل لأعلى معايير حماية البيانات والتشفير</span><span class="en">Designed for full compliance with the highest data protection and encryption standards</span></p>
+    </div>
+
+    <!-- Compliance Cards -->
+    <div class="compliance-grid">
+        <div class="comp-card nist reveal reveal-delay-1">
+            <span class="comp-badge">🇺🇸 NIST</span>
+            <h3><span class="ar">معايير المعهد الوطني للمعايير والتقنية</span><span class="en">National Institute of Standards & Technology</span></h3>
+            <p><span class="ar">امتثال كامل لمعايير NIST للتشفير والتشفير ما بعد الكم.</span><span class="en">Full compliance with NIST cryptographic and post-quantum standards.</span></p>
+            <ul class="comp-checks">
+                <li><span class="ar">FIPS 203 (ML-KEM) — تغليف المفاتيح ما بعد الكم</span><span class="en">FIPS 203 (ML-KEM) — Post-Quantum Key Encapsulation</span><span class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.EFCore/Matryoshka/MatryoshkaPqc.cs#L24-L96" target="_blank">📂 MatryoshkaPqc.cs:24-96</a></span></li>
+                <li><span class="ar">FIPS 197 (AES) — معيار التشفير المتقدم 256-bit</span><span class="en">FIPS 197 (AES) — Advanced Encryption Standard 256-bit</span><span class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.Core/Encryption/AES256EncryptionProvider.cs#L12-L157" target="_blank">📂 AES256EncryptionProvider.cs:12-157</a></span></li>
+                <li><span class="ar">SP 800-131A Rev.2 — انتقال الخوارزميات التشفيرية</span><span class="en">SP 800-131A Rev.2 — Transitioning Cryptographic Algorithms</span><span class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.Core/Encryption/PostQuantum/HybridEncryptionProvider.cs#L55-L133" target="_blank">📂 HybridEncryptionProvider.cs:55-133</a></span></li>
+                <li><span class="ar">SP 800-57 — توصيات إدارة المفاتيح</span><span class="en">SP 800-57 — Key Management Recommendations</span><span class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.Core/Encryption/SecureRandomGenerator.cs#L22-L79" target="_blank">📂 SecureRandomGenerator.cs:22-79</a></span></li>
+                <li><span class="ar">SP 800-175B — إرشادات استخدام التشفير</span><span class="en">SP 800-175B — Guideline for Using Cryptographic Standards</span><span class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.EFCore/Matryoshka/MatryoshkaValueCryptor.cs#L75-L116" target="_blank">📂 MatryoshkaValueCryptor.cs:75-116</a></span></li>
+            </ul>
+        </div>
+        <div class="comp-card nca reveal reveal-delay-2">
+            <span class="comp-badge">🇸🇦 NCA</span>
+            <h3><span class="ar">الهيئة الوطنية للأمن السيبراني</span><span class="en">National Cybersecurity Authority (Saudi Arabia)</span></h3>
+            <p><span class="ar">متوافق مع ضوابط الأمن السيبراني للأنظمة الحساسة والبيانات الوطنية.</span><span class="en">Compliant with cybersecurity controls for sensitive systems and national data.</span></p>
+            <ul class="comp-checks">
+                <li><span class="ar">ECC-1:2018 — الضوابط الأساسية للأمن السيبراني</span><span class="en">ECC-1:2018 — Essential Cybersecurity Controls</span><span class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.EFCore/Matryoshka/MatryoshkaValueCryptor.cs#L75-L116" target="_blank">📂 MatryoshkaValueCryptor.cs:75-116</a></span></li>
+                <li><span class="ar">CCC-1:2019 — ضوابط الأنظمة الحرجة</span><span class="en">CCC-1:2019 — Critical Systems Cybersecurity Controls</span><span class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.Core/Encryption/PostQuantum/HybridEncryptionProvider.cs#L55-L133" target="_blank">📂 HybridEncryptionProvider.cs:55-133</a></span></li>
+                <li><span class="ar">DCC — ضوابط أمن البيانات</span><span class="en">DCC — Data Cybersecurity Controls</span><span class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.EFCore/Matryoshka/MatryoshkaValueConverterFactory.cs#L17-L110" target="_blank">📂 ValueConverterFactory.cs:17-110</a></span></li>
+                <li><span class="ar">CTFC — ضوابط التقنيات السحابية</span><span class="en">CTFC — Cloud Technology Framework Controls</span><span class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.EFCore/Matryoshka/MatryoshkaKeyVault.cs#L28-L72" target="_blank">📂 MatryoshkaKeyVault.cs:28-72</a></span></li>
+                <li><span class="ar">NCS — المعايير الوطنية للتشفير</span><span class="en">NCS — National Cryptography Standards</span><span class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.EFCore/Matryoshka/MatryoshkaPqc.cs#L24-L96" target="_blank">📂 MatryoshkaPqc.cs:24-96</a></span></li>
+            </ul>
+        </div>
+        <div class="comp-card gdpr reveal reveal-delay-1">
+            <span class="comp-badge">🇪🇺 GDPR / PDPL</span>
+            <h3><span class="ar">حماية البيانات الشخصية</span><span class="en">Personal Data Protection</span></h3>
+            <p><span class="ar">يلبي متطلبات التشفير في GDPR الأوروبي ونظام حماية البيانات الشخصية السعودي.</span><span class="en">Meets encryption requirements of EU GDPR and Saudi PDPL.</span></p>
+            <ul class="comp-checks">
+                <li><span class="ar">المادة 32 GDPR — التدابير التقنية الملائمة</span><span class="en">Article 32 GDPR — Appropriate Technical Measures</span><span class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.EFCore/Matryoshka/MatryoshkaValueCryptor.cs#L75-L116" target="_blank">📂 MatryoshkaValueCryptor.cs:75-116</a></span></li>
+                <li><span class="ar">المادة 25 GDPR — حماية البيانات بالتصميم</span><span class="en">Article 25 GDPR — Data Protection by Design</span><span class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.EFCore/Matryoshka/MatryoshkaSchemaConvention.cs#L25-L57" target="_blank">📂 SchemaConvention.cs:25-57</a></span></li>
+                <li><span class="ar">نظام PDPL — تشفير البيانات الشخصية أثناء التخزين</span><span class="en">PDPL — Encryption of personal data at rest</span><span class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.EFCore/Matryoshka/MatryoshkaSchemaEncryptor.cs#L15-L39" target="_blank">📂 SchemaEncryptor.cs:15-39</a></span></li>
+                <li><span class="ar">الحق في الخصوصية — إخفاء المخطط يمنع التعرّف على البيانات</span><span class="en">Privacy Right — Schema obfuscation prevents data identification</span><span class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.EFCore/Matryoshka/MatryoshkaSchemaEncryptor.cs#L33-L39" target="_blank">📂 SchemaEncryptor.cs:33-39</a></span></li>
+            </ul>
+        </div>
+        <div class="comp-card pci reveal reveal-delay-2">
+            <span class="comp-badge">💳 PCI DSS 4.0</span>
+            <h3><span class="ar">معيار أمان بيانات صناعة بطاقات الدفع</span><span class="en">Payment Card Industry Data Security Standard</span></h3>
+            <p><span class="ar">يحقق متطلبات PCI DSS لحماية بيانات حامل البطاقة بأعلى مستوى.</span><span class="en">Meets PCI DSS requirements for cardholder data protection at the highest level.</span></p>
+            <ul class="comp-checks">
+                <li><span class="ar">المتطلب 3 — حماية بيانات الحساب المخزنة بالتشفير القوي</span><span class="en">Requirement 3 — Protect stored account data with strong cryptography</span><span class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.Core/Encryption/AES256EncryptionProvider.cs#L12-L157" target="_blank">📂 AES256EncryptionProvider.cs:12-157</a></span></li>
+                <li><span class="ar">المتطلب 3.5 — PAN مشفر أينما يُخزَّن</span><span class="en">Requirement 3.5 — PAN encrypted wherever stored</span><span class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.EFCore/Matryoshka/MatryoshkaValueCryptor.cs#L75-L116" target="_blank">📂 MatryoshkaValueCryptor.cs:75-116</a></span></li>
+                <li><span class="ar">المتطلب 6.2 — البرمجيات الآمنة (SBOM مضمن)</span><span class="en">Requirement 6.2 — Secure software (SBOM included)</span><span class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/.github/workflows/security-audit.yml#L129-L158" target="_blank">📂 security-audit.yml:129-158</a></span></li>
+                <li><span class="ar">المتطلب 12 — السياسات التنظيمية (التوثيق الكامل متاح)</span><span class="en">Requirement 12 — Organizational policies (full documentation available)</span><span class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/.github/workflows/publish-nuget.yml#L102-L106" target="_blank">📂 publish-nuget.yml:102-106</a></span></li>
+            </ul>
+        </div>
+        <div class="comp-card hipaa reveal reveal-delay-1">
+            <span class="comp-badge">🏥 HIPAA</span>
+            <h3><span class="ar">قانون قابلية نقل التأمين الصحي</span><span class="en">Health Insurance Portability & Accountability Act</span></h3>
+            <p><span class="ar">يوفر الضمانات التقنية المطلوبة لحماية المعلومات الصحية (ePHI).</span><span class="en">Provides required technical safeguards for electronic Protected Health Information (ePHI).</span></p>
+            <ul class="comp-checks">
+                <li><span class="ar">§164.312(a)(2)(iv) — تشفير البيانات أثناء الراحة</span><span class="en">§164.312(a)(2)(iv) — Encryption of data at rest</span><span class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.EFCore/Matryoshka/MatryoshkaValueCryptor.cs#L75-L116" target="_blank">📂 MatryoshkaValueCryptor.cs:75-116</a></span></li>
+                <li><span class="ar">§164.312(e)(2)(ii) — آلية تشفير البيانات الإلكترونية</span><span class="en">§164.312(e)(2)(ii) — Mechanism to encrypt ePHI</span><span class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.Core/Encryption/AES256EncryptionProvider.cs#L12-L157" target="_blank">📂 AES256EncryptionProvider.cs:12-157</a></span></li>
+                <li><span class="ar">§164.312(c)(1) — ضوابط السلامة (Merkle Tree)</span><span class="en">§164.312(c)(1) — Integrity controls (Merkle Tree)</span><span class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.EFCore/Security/MerkleKeyTree.cs#L210-L254" target="_blank">📂 MerkleKeyTree.cs:210-254</a></span></li>
+            </ul>
+        </div>
+        <div class="comp-card iso reveal reveal-delay-2">
+            <span class="comp-badge">🌐 ISO/IEC</span>
+            <h3><span class="ar">المعايير الدولية</span><span class="en">International Standards</span></h3>
+            <p><span class="ar">متوافق مع معايير ISO/IEC الدولية لأمن المعلومات والتشفير.</span><span class="en">Compliant with ISO/IEC international standards for information security and cryptography.</span></p>
+            <ul class="comp-checks">
+                <li><span class="ar">ISO/IEC 27001 — إدارة أمن المعلومات (ISMS)</span><span class="en">ISO/IEC 27001 — Information Security Management (ISMS)</span><span class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.EFCore/Matryoshka/MatryoshkaKeyVault.cs#L28-L72" target="_blank">📂 MatryoshkaKeyVault.cs:28-72</a></span></li>
+                <li><span class="ar">ISO/IEC 27018 — حماية PII في السحابة</span><span class="en">ISO/IEC 27018 — PII Protection in Cloud</span><span class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.EFCore/Matryoshka/MatryoshkaSchemaEncryptor.cs#L15-L39" target="_blank">📂 SchemaEncryptor.cs:15-39</a></span></li>
+                <li><span class="ar">ISO/IEC 19790 — متطلبات وحدات التشفير</span><span class="en">ISO/IEC 19790 — Cryptographic Module Requirements</span><span class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.Core/Encryption/AES256EncryptionProvider.cs#L12-L157" target="_blank">📂 AES256EncryptionProvider.cs:12-157</a></span></li>
+                <li><span class="ar">ISO/IEC 11770 — إدارة المفاتيح</span><span class="en">ISO/IEC 11770 — Key Management</span><span class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.EFCore/Security/MerkleKeyTree.cs#L54-L60" target="_blank">📂 MerkleKeyTree.cs:54-60</a></span></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Architecture Diagram -->
+    <div class="arch-diagram reveal">
+        <h3><span class="ar">🏗️ البنية الهندسية للتشفير — مخطط الطبقات</span><span class="en">🏗️ Encryption Architecture — Layered Diagram</span></h3>
+        <div class="arch-flow">
+            <div class="arch-layer arch-l1">
+                <span class="layer-name"><span class="ar">طبقة التطبيق</span><span class="en">Application Layer</span></span>
+                <span class="layer-detail">EF Core DbContext · LINQ Queries · SaveChanges()</span>
+            </div>
+            <div class="arch-arrow"></div>
+            <div class="arch-layer arch-l2">
+                <span class="layer-name"><span class="ar">طبقة الاعتراض</span><span class="en">Interceptor Layer</span></span>
+                <span class="layer-detail">IDbCommandInterceptor · IMaterializationInterceptor</span>
+            </div>
+            <div class="arch-arrow"></div>
+            <div class="arch-layer arch-l3">
+                <span class="layer-name"><span class="ar">محرك التشفير</span><span class="en">Encryption Engine</span></span>
+                <span class="layer-detail">AES-256-CBC · ML-KEM-768 · Hybrid · Merkle Tree</span>
+            </div>
+            <div class="arch-arrow"></div>
+            <div class="arch-layer arch-l4">
+                <span class="layer-name"><span class="ar">إخفاء المخطط</span><span class="en">Schema Obfuscation</span></span>
+                <span class="layer-detail">Table Names · Column Names · PK/FK Identifiers</span>
+            </div>
+            <div class="arch-arrow"></div>
+            <div class="arch-layer arch-l5">
+                <span class="layer-name"><span class="ar">طبقة تحويل النموذج</span><span class="en">Model Transform Layer</span></span>
+                <span class="layer-detail">IModelCustomizer · Convention · Configuration</span>
+            </div>
+            <div class="arch-arrow"></div>
+            <div class="arch-layer arch-l6">
+                <span class="layer-name"><span class="ar">قاعدة البيانات المشفّرة</span><span class="en">Encrypted Database</span></span>
+                <span class="layer-detail">SQL Server · PostgreSQL · SQLite · MySQL · Oracle</span>
+            </div>
+        </div>
+        <div class="arch-side-labels">
+            <span class="arch-side-label"><span class="ar">بيانات نصية</span><span class="en">Plaintext</span></span>
+            <span class="arch-side-label" style="color:var(--emerald)"><span class="ar">✓ مشفر بالكامل</span><span class="en">✓ Fully Encrypted</span></span>
+        </div>
+    </div>
+
+    <!-- Key Management Flow -->
+    <div class="key-mgmt reveal">
+        <h3><span class="ar">🔑 دورة حياة إدارة المفاتيح — وفق SP 800-57</span><span class="en">🔑 Key Lifecycle Management — Per SP 800-57</span></h3>
+        <div class="key-flow">
+            <div class="key-step">
+                <div class="ks-icon">🔐</div>
+                <h4><span class="ar">توليد المفتاح</span><span class="en">Key Generation</span></h4>
+                <p><span class="ar">CSPRNG · ML-KEM-768 KeyGen · AES-256 · مفاتيح مشتقة</span><span class="en">CSPRNG · ML-KEM-768 KeyGen · AES-256 · Derived Keys</span></p>
+            </div>
+            <div class="key-step">
+                <div class="ks-icon">📦</div>
+                <h4><span class="ar">تغليف المفتاح</span><span class="en">Key Encapsulation</span></h4>
+                <p><span class="ar">ML-KEM Encapsulate · مفتاح مشترك · كبسولة مشفّرة</span><span class="en">ML-KEM Encapsulate · Shared Secret · Encrypted Capsule</span></p>
+            </div>
+            <div class="key-step">
+                <div class="ks-icon">🔄</div>
+                <h4><span class="ar">استخدام المفتاح</span><span class="en">Key Usage</span></h4>
+                <p><span class="ar">تشفير/فك تشفير · توقيع · تحقق · عدم إعادة استخدام IV</span><span class="en">Encrypt/Decrypt · Sign · Verify · No IV Reuse</span></p>
+            </div>
+            <div class="key-step">
+                <div class="ks-icon">🗑️</div>
+                <h4><span class="ar">إتلاف المفتاح</span><span class="en">Key Destruction</span></h4>
+                <p><span class="ar">IDisposable · مسح الذاكرة · GC Pinning · عدم تسريب</span><span class="en">IDisposable · Memory Wipe · GC Pinning · Zero Leakage</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Compliance Matrix -->
+    <div class="reveal">
+        <h3 style="text-align:center;font-size:1.15rem;font-weight:700;margin-bottom:1.5rem"><span class="ar">📊 مصفوفة الامتثال التفصيلية</span><span class="en">📊 Detailed Compliance Matrix</span></h3>
+        <div class="matrix-wrap">
+        <table class="comp-matrix">
+            <thead><tr>
+                <th><span class="ar">المعيار</span><span class="en">Standard</span></th>
+                <th><span class="ar">المتطلب</span><span class="en">Requirement</span></th>
+                <th><span class="ar">ميزة EntityCrypt</span><span class="en">EntityCrypt Feature</span></th>
+                <th><span class="ar">الكود المصدري</span><span class="en">Source Evidence</span></th>
+                <th><span class="ar">الحالة</span><span class="en">Status</span></th>
+            </tr></thead>
+            <tbody>
+                <tr><td class="std-name">FIPS 203</td><td>Post-Quantum KEM</td><td>ML-KEM-768 (Kyber)</td><td class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.EFCore/Matryoshka/MatryoshkaPqc.cs#L24-L96" target="_blank">MatryoshkaPqc.cs:24-96</a></td><td class="check">✓</td></tr>
+                <tr><td class="std-name">FIPS 197</td><td>AES Encryption</td><td>AES-256-CBC / AES-256-GCM</td><td class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.Core/Encryption/AES256EncryptionProvider.cs#L12-L157" target="_blank">AES256EncryptionProvider.cs:12-157</a><br><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.EFCore/Matryoshka/MatryoshkaValueCryptor.cs#L75-L116" target="_blank">MatryoshkaValueCryptor.cs:75-116</a></td><td class="check">✓</td></tr>
+                <tr><td class="std-name">SP 800-57</td><td>Key Management</td><td>CSPRNG + HKDF + IDisposable + Memory Wipe</td><td class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.Core/Encryption/SecureRandomGenerator.cs#L22-L79" target="_blank">SecureRandomGenerator.cs:22-79</a><br><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.EFCore/Security/MerkleKeyTree.cs#L54-L60" target="_blank">MerkleKeyTree.cs:54-60</a></td><td class="check">✓</td></tr>
+                <tr><td class="std-name">SP 800-131A</td><td>Algorithm Transition</td><td>Hybrid Mode (Classical + PQC)</td><td class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.Core/Encryption/PostQuantum/HybridEncryptionProvider.cs#L55-L133" target="_blank">HybridEncryptionProvider.cs:55-133</a></td><td class="check">✓</td></tr>
+                <tr><td class="std-name">NCA ECC-1</td><td>Encryption Controls</td><td>Multi-layer encryption engine</td><td class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.EFCore/Matryoshka/MatryoshkaValueCryptor.cs#L75-L116" target="_blank">MatryoshkaValueCryptor.cs:75-116</a><br><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.EFCore/Matryoshka/MatryoshkaValueConverterFactory.cs#L17-L110" target="_blank">ValueConverterFactory.cs:17-110</a></td><td class="check">✓</td></tr>
+                <tr><td class="std-name">NCA DCC</td><td>Data Classification</td><td>3-level encryption (Classical/Hybrid/PQC)</td><td class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.EFCore/Matryoshka/MatryoshkaValueConverterFactory.cs#L17-L110" target="_blank">ValueConverterFactory.cs:17-110</a></td><td class="check">✓</td></tr>
+                <tr><td class="std-name">GDPR Art.32</td><td>Technical Measures</td><td>Transparent encryption at rest</td><td class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.EFCore/Matryoshka/MatryoshkaValueCryptor.cs#L75-L116" target="_blank">MatryoshkaValueCryptor.cs:75-116</a></td><td class="check">✓</td></tr>
+                <tr><td class="std-name">GDPR Art.25</td><td>Privacy by Design</td><td>Schema obfuscation + auto encryption</td><td class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.EFCore/Matryoshka/MatryoshkaSchemaEncryptor.cs#L15-L39" target="_blank">SchemaEncryptor.cs:15-39</a><br><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.EFCore/Matryoshka/MatryoshkaSchemaConvention.cs#L25-L57" target="_blank">SchemaConvention.cs:25-57</a></td><td class="check">✓</td></tr>
+                <tr><td class="std-name">PDPL</td><td>Data Encryption</td><td>Full column + schema encryption</td><td class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.EFCore/Matryoshka/MatryoshkaSchemaEncryptor.cs#L15-L39" target="_blank">SchemaEncryptor.cs:15-39</a><br><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.EFCore/Matryoshka/MatryoshkaValueCryptor.cs#L75-L116" target="_blank">ValueCryptor.cs:75-116</a></td><td class="check">✓</td></tr>
+                <tr><td class="std-name">PCI DSS 3.5</td><td>PAN Encryption</td><td>AES-256 / Hybrid per-column</td><td class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.EFCore/Matryoshka/MatryoshkaValueCryptor.cs#L75-L116" target="_blank">MatryoshkaValueCryptor.cs:75-116</a></td><td class="check">✓</td></tr>
+                <tr><td class="std-name">PCI DSS 6.2</td><td>Secure Software</td><td>SBOM (CycloneDX) + SHA-256 checksums</td><td class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/.github/workflows/security-audit.yml#L129-L158" target="_blank">security-audit.yml:129-158</a><br><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/.github/workflows/publish-nuget.yml#L102-L106" target="_blank">publish-nuget.yml:102-106</a></td><td class="check">✓</td></tr>
+                <tr><td class="std-name">HIPAA §164.312</td><td>ePHI Encryption</td><td>AES-256 / PQC encryption at rest</td><td class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.EFCore/Matryoshka/MatryoshkaValueCryptor.cs#L75-L116" target="_blank">MatryoshkaValueCryptor.cs:75-116</a><br><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.EFCore/Matryoshka/MatryoshkaPqc.cs#L24-L96" target="_blank">MatryoshkaPqc.cs:24-96</a></td><td class="check">✓</td></tr>
+                <tr><td class="std-name">HIPAA §164.312(c)</td><td>Integrity Controls</td><td>Merkle Tree verification</td><td class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.EFCore/Security/MerkleKeyTree.cs#L210-L254" target="_blank">MerkleKeyTree.cs:210-254</a></td><td class="check">✓</td></tr>
+                <tr><td class="std-name">ISO 27001</td><td>ISMS Controls</td><td>A.10 Cryptography controls</td><td class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.Core/Encryption/AES256EncryptionProvider.cs#L12-L157" target="_blank">AES256EncryptionProvider.cs:12-157</a><br><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.EFCore/Matryoshka/MatryoshkaKeyVault.cs#L28-L72" target="_blank">MatryoshkaKeyVault.cs:28-72</a></td><td class="check">✓</td></tr>
+                <tr><td class="std-name">ISO 19790</td><td>Crypto Modules</td><td>.NET Cryptography + ML-KEM</td><td class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.Core/Encryption/AES256EncryptionProvider.cs#L12-L157" target="_blank">AES256EncryptionProvider.cs:12-157</a><br><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.EFCore/Matryoshka/MatryoshkaPqc.cs#L24-L96" target="_blank">MatryoshkaPqc.cs:24-96</a></td><td class="check">✓</td></tr>
+                <tr><td class="std-name">SOC 2</td><td>Data Protection</td><td>Encryption + audit trail + SBOM</td><td class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/.github/workflows/security-audit.yml#L35-L77" target="_blank">security-audit.yml:35-77</a></td><td class="check">✓</td></tr>
+                <tr><td class="std-name">SAMA CSF</td><td>Crypto Controls</td><td>Multi-algorithm encryption</td><td class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.Core/Encryption/PostQuantum/HybridEncryptionProvider.cs#L55-L133" target="_blank">HybridEncryptionProvider.cs:55-133</a></td><td class="check">✓</td></tr>
+                <tr><td class="std-name">CCPA/CPRA</td><td>Consumer Privacy</td><td>Data encryption + pseudonymization</td><td class="src-link"><a href="https://github.com/sbay-dev/EntityCrypt-src/blob/main/src/EntityCrypt.EFCore/Matryoshka/MatryoshkaSchemaEncryptor.cs#L15-L39" target="_blank">SchemaEncryptor.cs:15-39</a></td><td class="check">✓</td></tr>
+            </tbody>
+        </table>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ BENCHMARKS ═══ -->
+<section id="benchmarks">
+    <div class="sec-header reveal">
+        <span class="sec-tag"><span class="ar">📊 الأداء</span><span class="en">📊 Performance</span></span>
+        <div class="sec-divider"></div>
+        <h2><span class="ar">سرعة لا تُصدَّق</span><span class="en">Unbelievable Speed</span></h2>
+        <p><span class="ar">قياسات BenchmarkDotNet حقيقية على .NET 10</span><span class="en">Real BenchmarkDotNet measurements on .NET 10</span></p>
+    </div>
+    <div class="bench-card reveal">
+        <div class="bench-top">
+            <strong>BenchmarkDotNet v0.14.0</strong>
+            <span class="env">.NET 10.0 · Release · x64</span>
+        </div>
+        <table class="bench-table">
+            <thead><tr><th>Method</th><th>Mean</th><th>Allocated</th></tr></thead>
+            <tbody>
+                <tr><td class="method">Classical Encrypt</td><td class="time">1.27 µs</td><td class="mem">1.9 KB</td></tr>
+                <tr><td class="method">Classical Decrypt</td><td class="time">3.30 µs</td><td class="mem">7.0 KB</td></tr>
+                <tr><td class="method">PQC KeyGen (ML-KEM-768)</td><td class="time">48.54 µs</td><td class="mem">6.4 KB</td></tr>
+                <tr><td class="method">PQC Encapsulate</td><td class="time">24.86 µs</td><td class="mem">1.5 KB</td></tr>
+                <tr><td class="method">PQC Decapsulate</td><td class="time">36.53 µs</td><td class="mem">376 B</td></tr>
+                <tr><td class="method">Hybrid Encrypt</td><td class="time">29.50 µs</td><td class="mem">18.2 KB</td></tr>
+                <tr><td class="method">Hybrid Decrypt</td><td class="time">75.87 µs</td><td class="mem">38.6 KB</td></tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- ═══ SECURITY ═══ -->
+<section id="security">
+    <div class="sec-header reveal">
+        <span class="sec-tag"><span class="ar">🏰 الأمان</span><span class="en">🏰 Security</span></span>
+        <div class="sec-divider"></div>
+        <h2><span class="ar">حصن رقمي متعدد الطبقات</span><span class="en">Multi-Layered Digital Fortress</span></h2>
+        <p><span class="ar">ضمانات أمنية مدمجة في كل مرحلة من CI/CD</span><span class="en">Built-in security guarantees at every CI/CD stage</span></p>
+    </div>
+    <div class="fortress">
+        <div class="fort-item reveal reveal-delay-1">
+            <div class="fort-icon">🔍</div>
+            <div><h4><span class="ar">فحص ثغرات تلقائي</span><span class="en">Automated Vulnerability Scanning</span></h4><p><span class="ar">كل PR يُفحص — حظر تلقائي عند High/Critical</span><span class="en">Every PR scanned — auto-blocked on High/Critical</span></p></div>
+        </div>
+        <div class="fort-item reveal reveal-delay-2">
+            <div class="fort-icon">🛡️</div>
+            <div><h4><span class="ar">بوابة أمنية قبل النشر</span><span class="en">Security Gate Before Publish</span></h4><p><span class="ar">لا يُنشر شيء على NuGet بدون اجتياز الفحص</span><span class="en">Nothing published to NuGet without passing audit</span></p></div>
+        </div>
+        <div class="fort-item reveal reveal-delay-3">
+            <div class="fort-icon">🧪</div>
+            <div><h4><span class="ar">70+ اختبار</span><span class="en">70+ Tests</span></h4><p><span class="ar">وحدة وتكامل مع تغطية شاملة</span><span class="en">Unit and integration with comprehensive coverage</span></p></div>
+        </div>
+        <div class="fort-item reveal reveal-delay-1">
+            <div class="fort-icon">📋</div>
+            <div><h4><span class="ar">SBOM لكل إصدار</span><span class="en">SBOM Per Release</span></h4><p><span class="ar">CycloneDX — قائمة مواد برمجية كاملة</span><span class="en">CycloneDX — complete Software Bill of Materials</span></p></div>
+        </div>
+        <div class="fort-item reveal reveal-delay-2">
+            <div class="fort-icon">🔏</div>
+            <div><h4><span class="ar">SHA-256 Checksums</span><span class="en">SHA-256 Checksums</span></h4><p><span class="ar">للتحقق من سلامة كل حزمة</span><span class="en">Verify integrity of every package</span></p></div>
+        </div>
+        <div class="fort-item reveal reveal-delay-3">
+            <div class="fort-icon">📅</div>
+            <div><h4><span class="ar">تدقيق أسبوعي</span><span class="en">Weekly Audit</span></h4><p><span class="ar">فحص مجدول + issue تلقائي عند اكتشاف ثغرات</span><span class="en">Scheduled scan + auto-issue on vulnerability detection</span></p></div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ PACKAGES ═══ -->
+<section id="packages">
+    <div class="sec-header reveal">
+        <span class="sec-tag"><span class="ar">📦 الحزم</span><span class="en">📦 Packages</span></span>
+        <div class="sec-divider"></div>
+        <h2><span class="ar">التثبيت من NuGet</span><span class="en">Install from NuGet</span></h2>
+    </div>
+    <div class="pkg-grid reveal">
+        <div class="pkg">
+            <h3>EntityCrypt.EFCore</h3>
+            <p><span class="ar">الحزمة الرئيسية — تكامل EF Core الشفاف مع اعتراضات التشفير وسمات الكيانات وتشفير المخطط.</span><span class="en">Main package — transparent EF Core integration with encryption interceptors, entity attributes, and schema obfuscation.</span></p>
+            <div class="pkg-cmd"><code>dotnet add package EntityCrypt.EFCore</code><button onclick="navigator.clipboard.writeText('dotnet add package EntityCrypt.EFCore');this.textContent='✓';setTimeout(()=>this.textContent='📋',2000)">📋</button></div>
+        </div>
+        <div class="pkg">
+            <h3>EntityCrypt.Core</h3>
+            <p><span class="ar">محرك التشفير المستقل — AES-256، ML-KEM-768، تشفير هجين، شجرة Merkle.</span><span class="en">Standalone encryption engine — AES-256, ML-KEM-768, Hybrid encryption, Merkle Tree.</span></p>
+            <div class="pkg-cmd"><code>dotnet add package EntityCrypt.Core</code><button onclick="navigator.clipboard.writeText('dotnet add package EntityCrypt.Core');this.textContent='✓';setTimeout(()=>this.textContent='📋',2000)">📋</button></div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ CTA ═══ -->
+<section class="cta-section">
+    <h2 class="reveal">
+        <span class="ar">ابدأ بحماية بياناتك <span class="glow-text">بالتشفير الكمّي</span> اليوم</span>
+        <span class="en">Start Protecting Your Data with <span class="glow-text">Quantum Encryption</span> Today</span>
+    </h2>
+    <p class="reveal">
+        <span class="ar">سطر واحد لتحويل قاعدة بياناتك من مكشوفة إلى حصن رقمي لا يُخترق</span>
+        <span class="en">One line to transform your database from exposed to an impenetrable digital fortress</span>
+    </p>
+    <div class="cta-buttons reveal">
+        <a href="https://www.nuget.org/packages/EntityCrypt.EFCore" class="btn btn-quantum" target="_blank"><span class="ar">📦 تثبيت من NuGet</span><span class="en">📦 Install from NuGet</span></a>
+        <a href="https://github.com/sbay-dev/EntityCrypt" class="btn btn-ghost" target="_blank"><span class="ar">📖 التوثيق الكامل</span><span class="en">📖 Full Documentation</span></a>
+    </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+<div class="footer-inner">
+    <div class="footer-tech">
+        <span>.NET 10</span><span>EF Core 10</span><span>AES-256</span><span>ML-KEM-768</span><span>FIPS 203</span><span>Merkle Tree</span><span>MIT</span>
+    </div>
+    <ul class="footer-nav">
+        <li><a href="https://github.com/sbay-dev/EntityCrypt" target="_blank">GitHub</a></li>
+        <li><a href="https://www.nuget.org/packages/EntityCrypt.EFCore" target="_blank">NuGet</a></li>
+        <li><a href="https://github.com/sbay-dev/EntityCrypt/releases" target="_blank"><span class="ar">الإصدارات</span><span class="en">Releases</span></a></li>
+        <li><a href="https://github.com/sbay-dev/EntityCrypt/issues" target="_blank"><span class="ar">الدعم</span><span class="en">Support</span></a></li>
+        <li><a href="https://github.com/sbay-dev/EntityCrypt/blob/main/docs/PUBLISHING_GUIDE.md" target="_blank"><span class="ar">دليل النشر</span><span class="en">Publishing Guide</span></a></li>
+    </ul>
+    <p class="footer-copy">© 2025 EntityCrypt · <span class="ar">مشروع مفتوح المصدر بترخيص MIT</span><span class="en">Open-source project under MIT license</span></p>
+</div>
+</footer>
+
+<script>
+// ═══ LANGUAGE SWITCH ═══
+function setLang(lang){
+    document.body.className='lang-'+lang;
+    document.documentElement.lang=lang;
+    document.documentElement.dir=lang==='ar'?'rtl':'ltr';
+    document.getElementById('btnAr').className=lang==='ar'?'active':'';
+    document.getElementById('btnEn').className=lang==='en'?'active':'';
+    localStorage.setItem('ec-lang',lang);
+}
+(function(){var l=localStorage.getItem('ec-lang');if(l)setLang(l)})();
+
+// ═══ QUANTUM PARTICLES ═══
+(function(){
+const c=document.getElementById('quantum-bg'),x=c.getContext('2d');
+let w,h,ps=[];const N=100,D=140;
+const cols=['rgba(168,85,247,','rgba(6,214,240,','rgba(52,211,153,'];
+function resize(){w=c.width=innerWidth;h=c.height=innerHeight}
+addEventListener('resize',resize);resize();
+class P{constructor(){this.x=Math.random()*w;this.y=Math.random()*h;this.vx=(Math.random()-.5)*.35;this.vy=(Math.random()-.5)*.35;this.r=Math.random()*1.8+.5;this.c=cols[Math.floor(Math.random()*3)];this.a=Math.random()*.4+.1;this.p=Math.random()*6.28;this.ps=Math.random()*.02+.008}
+update(){this.x+=this.vx;this.y+=this.vy;this.p+=this.ps;if(this.x<0||this.x>w)this.vx*=-1;if(this.y<0||this.y>h)this.vy*=-1}
+draw(){const a=this.a*(.5+Math.sin(this.p)*.5);x.beginPath();x.arc(this.x,this.y,this.r,0,6.28);x.fillStyle=this.c+a+')';x.fill();x.beginPath();x.arc(this.x,this.y,this.r*3,0,6.28);x.fillStyle=this.c+(a*.12)+')';x.fill()}}
+for(let i=0;i<N;i++)ps.push(new P);
+function draw(){x.clearRect(0,0,w,h);
+for(let i=0;i<ps.length;i++){for(let j=i+1;j<ps.length;j++){const dx=ps[i].x-ps[j].x,dy=ps[i].y-ps[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<D){x.beginPath();x.moveTo(ps[i].x,ps[i].y);x.lineTo(ps[j].x,ps[j].y);x.strokeStyle='rgba(168,85,247,'+(1-d/D)*.06+')';x.lineWidth=.5;x.stroke()}}}
+ps.forEach(p=>{p.update();p.draw()});requestAnimationFrame(draw)}draw()})();
+
+// ═══ NAV ═══
+const nav=document.getElementById('navbar');
+addEventListener('scroll',()=>nav.classList.toggle('solid',scrollY>80));
+
+// ═══ REVEAL ═══
+const obs=new IntersectionObserver(e=>{e.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')})},{threshold:.1,rootMargin:'0px 0px -50px 0px'});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+// ═══ ENCRYPTION ANIMATION ═══
+(function(){const ch='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+const t=['enc1','enc2','enc3','enc4'],b=['3Kf8Lm2Pq9Rt','MLKEM:xB7n9Q','y8Hj2Kl5Mn7O','PQC:9vWx3Yz1'];
+setInterval(()=>{t.forEach((id,i)=>{const el=document.getElementById(id);if(!el)return;let o='';for(let j=0;j<b[i].length;j++)o+=Math.random()>.3?ch[Math.floor(Math.random()*ch.length)]:b[i][j];el.textContent=o+'...'})},150)})();
+</script>
+
+</body>
+</html>
